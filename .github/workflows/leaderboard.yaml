@@ -180,8 +180,19 @@ jobs:
               }
 
               const leaderboardMd = await fs.readFile('leaderboard_weekly.md', 'utf8');
-              // Append the generated leaderboard to the end of the existing README (do not create markers or branches)
-              let newReadme = currentReadme + '\n\n' + leaderboardMd + '\n';
+              // Replace the leaderboard section between markers. If markers don't exist, append a marker block.
+              const startMarker = '<!-- leaderboard-start -->';
+              const endMarker = '<!-- leaderboard-end -->';
+              let newReadme;
+              if (currentReadme.includes(startMarker) && currentReadme.includes(endMarker)) {
+                // replace between markers
+                const re = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}`, 'g');
+                newReadme = currentReadme.replace(re, `${startMarker}\n${leaderboardMd}\n${endMarker}`);
+              } else {
+                // append new marker block at the end
+                const appendMarker = '\n\n---\n\n';
+                newReadme = currentReadme + appendMarker + startMarker + '\n' + leaderboardMd + '\n' + endMarker + '\n';
+              }
 
               if (currentReadme.trim() === newReadme.trim()) {
                 console.log('README already up-to-date, skipping commit.');
