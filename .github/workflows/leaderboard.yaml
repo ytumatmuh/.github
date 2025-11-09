@@ -11,7 +11,8 @@ on:
     - cron: '0 8 * * 1' # weekly on Mondays at 08:00 UTC (optional)
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -27,64 +28,167 @@ jobs:
         with:
           script: |
             const fs = require('fs').promises;
-            // Accept username from workflow_dispatch input; fall back to ytumatmuh
-            const username = (context.payload && context.payload.inputs && context.payload.inputs.username) || 'ytumatmuh';
+            // Analyze organization 'ytumatmuh' for commits in the last 7 days
+            const org = 'ytumatmuh';
+            const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-            // Get recent public events for the user (includes PushEvent)
-            const events = await github.paginate(github.rest.activity.listPublicEventsForUser, { username, per_page: 100 });
+            // fetch public repos for the org
+            const repos = await github.paginate(github.rest.repos.listForOrg, { org, type: 'public', per_page: 100 });
 
-            const counts = {};
-            const latest = {};
+            const repoCounts = {}; // repo -> commit count
+            const authorCounts = {}; // author -> commit count
+            const repoAuthors = {}; // repo -> { author -> count }
 
-            for (const e of events) {
-              if (e.type !== 'PushEvent') continue;
-              const when = e.created_at;
-              const commits = (e.payload && e.payload.commits) || [];
+            for (const r of repos) {
+              if (r.archived) continue;
+              const name = r.name;
+              // list commits in the last week
+              let commits = [];
+              try {
+                commits = await github.paginate(github.rest.repos.listCommits, { owner: org, repo: name, since, per_page: 100 });
+              } catch (e) {
+                console.log(`skip repo ${name} due to error listing commits:`, e.message || e);
+                continue;
+              }
+              if (!commits || commits.length === 0) continue;
+              repoCounts[name] = commits.length;
+              repoAuthors[name] = repoAuthors[name] || {};
               for (const c of commits) {
-                // prefer commit author name, fall back to email or sha
-                const name = (c.author && (c.author.name || c.author.email)) || c.sha || 'unknown';
-                counts[name] = (counts[name] || 0) + 1;
-                if (!latest[name] || new Date(when) > new Date(latest[name])) latest[name] = when;
+                const authorName = (c.commit && c.commit.author && c.commit.author.name) || (c.author && c.author.login) || (c.commit && c.commit.author && c.commit.author.email) || c.sha;
+                authorCounts[authorName] = (authorCounts[authorName] || 0) + 1;
+                repoAuthors[name][authorName] = (repoAuthors[name][authorName] || 0) + 1;
               }
             }
 
-            const items = Object.keys(counts).map(n => ({ name: n, count: counts[n], latest: latest[n] }));
-            items.sort((a, b) => (b.count - a.count) || (new Date(b.latest) - new Date(a.latest)));
-            const top = items.slice(0, 10);
+            const repoItems = Object.keys(repoCounts).map(rn => ({ repo: rn, commits: repoCounts[rn] }));
+            repoItems.sort((a,b) => b.commits - a.commits);
 
-            const labels = top.map(i => i.name);
-            const data = top.map(i => i.count);
+            const authorItems = Object.keys(authorCounts).map(a => ({ author: a, commits: authorCounts[a] }));
+            authorItems.sort((a,b) => b.commits - a.commits);
 
-            // Chart configuration for QuickChart
-            const chartConfig = {
-              type: 'bar',
-              data: {
-                labels,
-                datasets: [{ label: 'Commits (recent events)', data }]
-              },
-              options: {
-                plugins: { legend: { display: false } },
-                title: { display: true, text: `Top committers (recent) — ${username}` },
-                scales: { y: { beginAtZero: true, precision: 0 } }
-              }
+            const topRepos = repoItems.slice(0, 20);
+            const topAuthors = authorItems.slice(0, 20);
+
+            // Build markdown table
+            const mdLines = [];
+            mdLines.push(`# Weekly commit leaderboard for org: ${org}`);
+            mdLines.push(`_Period start:_ ${since}`);
+            mdLines.push('');
+            mdLines.push('## Top repositories (by commits in last 7 days)');
+            mdLines.push('| Repo | Commits |');
+            mdLines.push('| --- | ---: |');
+            for (const r of topRepos) mdLines.push(`| ${r.repo} | ${r.commits} |`);
+            mdLines.push('');
+            mdLines.push('## Top contributors (by commits in last 7 days)');
+            mdLines.push('| Author | Commits |');
+            mdLines.push('| --- | ---: |');
+            for (const a of topAuthors) mdLines.push(`| ${a.author} | ${a.commits} |`);
+            mdLines.push('');
+            mdLines.push('## Per-repo contributor breakdown (top 5 per repo)');
+            for (const r of topRepos) {
+              mdLines.push(`### ${r.repo} — ${r.commits} commits`);
+              mdLines.push('| Author | Commits |');
+              mdLines.push('| --- | ---: |');
+              const entries = Object.keys(repoAuthors[r.repo] || {}).map(k => ({ author: k, commits: repoAuthors[r.repo][k] }));
+              entries.sort((a,b) => b.commits - a.commits);
+              for (const e of entries.slice(0,5)) mdLines.push(`| ${e.author} | ${e.commits} |`);
+              mdLines.push('');
+            }
+
+            const md = mdLines.join('\n');
+            await fs.writeFile('leaderboard_weekly.md', md);
+            await fs.writeFile('leaderboard_weekly.json', JSON.stringify({ generated_at: new Date().toISOString(), since, org, topRepos, topAuthors, repoAuthors }, null, 2));
+
+            // produce two charts (top repos and top authors)
+            const qc = async (labels, data, title, filename) => {
+              const chartConfig = { type: 'bar', data: { labels, datasets: [{ label: title, data }] }, options: { plugins: { legend: { display: false } }, title: { display: true, text: title }, scales: { y: { beginAtZero: true } } } };
+              const qcResp = await fetch('https://quickchart.io/chart/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chart: chartConfig, width: 1200, height: 600, backgroundColor: 'white' }) });
+              const qcJson = await qcResp.json();
+              const imgResp = await fetch(qcJson.url);
+              const arr = await imgResp.arrayBuffer();
+              await fs.writeFile(filename, Buffer.from(arr));
             };
 
-            // Create a chart via QuickChart and download it
-            const qcResp = await fetch('https://quickchart.io/chart/create', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ chart: chartConfig, width: 1200, height: 600, backgroundColor: 'white' })
-            });
-            const qcJson = await qcResp.json();
-            const imageUrl = qcJson.url;
-            const imgResp = await fetch(imageUrl);
-            const arr = await imgResp.arrayBuffer();
-            await fs.writeFile('leaderboard.png', Buffer.from(arr));
+            await qc(topRepos.map(r=>r.repo), topRepos.map(r=>r.commits), `Top repos — ${org}`, 'top_repos.png');
+            await qc(topAuthors.map(a=>a.author), topAuthors.map(a=>a.commits), `Top authors — ${org}`, 'top_authors.png');
 
-            // Save JSON summary as well
-            await fs.writeFile('leaderboard.json', JSON.stringify({ generated_at: new Date().toISOString(), username, top }, null, 2));
+            console.log('Generated leaderboard_weekly.md, leaderboard_weekly.json, top_repos.png, top_authors.png');
 
-            console.log('leaderboard image and summary written: leaderboard.png, leaderboard.json');
+            // Now create a draft PR that updates the profile README by appending the markdown summary
+            try {
+              const repoInfo = await github.rest.repos.get({ owner: context.repo.owner, repo: context.repo.repo });
+              const baseBranch = repoInfo.data.default_branch;
+              const baseRef = await github.rest.git.getRef({ owner: context.repo.owner, repo: context.repo.repo, ref: `heads/${baseBranch}` });
+              const baseSha = baseRef.data.object.sha;
+
+              // Read current README in profile path
+              const readmePath = '.github/profile/README.md';
+              let currentReadme = '';
+              try {
+                const existing = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: readmePath, ref: baseBranch });
+                const buff = Buffer.from(existing.data.content, existing.data.encoding);
+                currentReadme = buff.toString('utf8');
+              } catch (e) {
+                // if not found, start with empty
+                currentReadme = '';
+              }
+
+              const leaderboardMd = (await fs.readFile('leaderboard_weekly.md', 'utf8'));
+              const appendMarker = '\n\n---\n\n<!-- leaderboard-start -->\n';
+              const newReadme = currentReadme + appendMarker + leaderboardMd + '\n<!-- leaderboard-end -->\n';
+
+              if (currentReadme.trim() === newReadme.trim()) {
+                console.log('README already up-to-date, skipping PR creation.');
+              } else {
+                const timestamp = Date.now();
+                const branchName = `leaderboard/update-${timestamp}`;
+
+                // create branch
+                await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: `refs/heads/${branchName}`, sha: baseSha });
+
+                // commit README update
+                const newReadmeEncoded = Buffer.from(newReadme, 'utf8').toString('base64');
+                let readmeSha = null;
+                try {
+                  const existing = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: readmePath, ref: baseBranch });
+                  readmeSha = existing.data.sha;
+                } catch (e) {
+                  // file may not exist
+                }
+                await github.rest.repos.createOrUpdateFileContents({ owner: context.repo.owner, repo: context.repo.repo, path: readmePath, message: `AI: update leaderboard (${new Date().toISOString()})`, content: newReadmeEncoded, branch: branchName, sha: readmeSha });
+
+                // commit images
+                const uploadFile = async (localPath, targetPath) => {
+                  const content = await fs.readFile(localPath);
+                  const encoded = Buffer.from(content).toString('base64');
+                  let sha = null;
+                  try {
+                    const existing = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: targetPath, ref: baseBranch });
+                    sha = existing.data.sha;
+                  } catch (e) {
+                    // ignore
+                  }
+                  await github.rest.repos.createOrUpdateFileContents({ owner: context.repo.owner, repo: context.repo.repo, path: targetPath, message: `AI: add leaderboard image ${targetPath}`, content: encoded, branch: branchName, sha });
+                };
+
+                await uploadFile('top_repos.png', '.github/profile/top_repos.png');
+                await uploadFile('top_authors.png', '.github/profile/top_authors.png');
+
+                // create PR (draft)
+                const pr = await github.rest.pulls.create({ owner: context.repo.owner, repo: context.repo.repo, title: `Update profile leaderboard (${new Date().toISOString().split('T')[0]})`, head: branchName, base: baseBranch, body: 'Automated leaderboard update (draft). Please review and merge.', draft: true });
+                console.log('Created PR:', pr.data.html_url);
+
+                // request reviewer and assign to Onur-TURAN
+                try {
+                  await github.rest.pulls.requestReviewers({ owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.data.number, reviewers: ['Onur-TURAN'] });
+                } catch (e) { console.log('requestReviewers error:', e.message || e); }
+                try {
+                  await github.rest.issues.addAssignees({ owner: context.repo.owner, repo: context.repo.repo, issue_number: pr.data.number, assignees: ['Onur-TURAN'] });
+                } catch (e) { console.log('addAssignees error:', e.message || e); }
+              }
+            } catch (e) {
+              console.log('PR automation failed:', e.message || e);
+            }
 
       - name: Upload leaderboard artifacts
         uses: actions/upload-artifact@v4
