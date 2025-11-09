@@ -1,0 +1,100 @@
+name: Leaderboard - recent committers (ytumatmuh)
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'GitHub username to aggregate (default: ytumatmuh)'
+        required: false
+        default: 'ytumatmuh'
+  schedule:
+    - cron: '0 8 * * 1' # weekly on Mondays at 08:00 UTC (optional)
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate leaderboard image (fetch public events + QuickChart)
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs').promises;
+            // Accept username from workflow_dispatch input; fall back to ytumatmuh
+            const username = (context.payload && context.payload.inputs && context.payload.inputs.username) || 'ytumatmuh';
+
+            // Get recent public events for the user (includes PushEvent)
+            const events = await github.paginate(github.rest.activity.listPublicEventsForUser, { username, per_page: 100 });
+
+            const counts = {};
+            const latest = {};
+
+            for (const e of events) {
+              if (e.type !== 'PushEvent') continue;
+              const when = e.created_at;
+              const commits = (e.payload && e.payload.commits) || [];
+              for (const c of commits) {
+                // prefer commit author name, fall back to email or sha
+                const name = (c.author && (c.author.name || c.author.email)) || c.sha || 'unknown';
+                counts[name] = (counts[name] || 0) + 1;
+                if (!latest[name] || new Date(when) > new Date(latest[name])) latest[name] = when;
+              }
+            }
+
+            const items = Object.keys(counts).map(n => ({ name: n, count: counts[n], latest: latest[n] }));
+            items.sort((a, b) => (b.count - a.count) || (new Date(b.latest) - new Date(a.latest)));
+            const top = items.slice(0, 10);
+
+            const labels = top.map(i => i.name);
+            const data = top.map(i => i.count);
+
+            // Chart configuration for QuickChart
+            const chartConfig = {
+              type: 'bar',
+              data: {
+                labels,
+                datasets: [{ label: 'Commits (recent events)', data }]
+              },
+              options: {
+                plugins: { legend: { display: false } },
+                title: { display: true, text: `Top committers (recent) — ${username}` },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+              }
+            };
+
+            // Create a chart via QuickChart and download it
+            const qcResp = await fetch('https://quickchart.io/chart/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chart: chartConfig, width: 1200, height: 600, backgroundColor: 'white' })
+            });
+            const qcJson = await qcResp.json();
+            const imageUrl = qcJson.url;
+            const imgResp = await fetch(imageUrl);
+            const arr = await imgResp.arrayBuffer();
+            await fs.writeFile('leaderboard.png', Buffer.from(arr));
+
+            // Save JSON summary as well
+            await fs.writeFile('leaderboard.json', JSON.stringify({ generated_at: new Date().toISOString(), username, top }, null, 2));
+
+            console.log('leaderboard image and summary written: leaderboard.png, leaderboard.json');
+
+      - name: Upload leaderboard artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: leaderboard
+          path: |
+            leaderboard.png
+            leaderboard.json
+
+      - name: Print quick summary
+        run: |
+          echo "Generated leaderboard - see leaderboard.json";
+          cat leaderboard.json

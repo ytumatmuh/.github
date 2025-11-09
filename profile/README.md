@@ -15,9 +15,9 @@ Bu proje, [ytumatmuh öğrencileri] topluluğu için hazırlanan bir tanıtım s
 | Gün         | Konu               |
 |-------------|--------------------|
 | Pazartesi   | Yapay Zeka         |
-| Salı        | Siber Güvenlik     |
+| Salı        | Kriptoloji ve Siber Güvenlik     |
 | Perşembe    | Web Geliştirme     |
-| Cuma        | Kriptoloji         |
+
 
 
 ## Katkıda Bulunma
@@ -32,3 +32,6 @@ KMB327 sınıfında beklemekteyiz. Ya da katkı sağlayanlara mail atabilirsiniz
 ---
 
 created by student's
+## Leaderboard
+
+![Leaderboard](leaderboard.png)
