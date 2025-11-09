@@ -165,8 +165,8 @@ jobs:
               const baseRef = await github.rest.git.getRef({ owner: repoOwner, repo: repoName, ref: `heads/${baseBranch}` });
               const baseSha = baseRef.data.object.sha;
 
-              // Read current README in profile path
-              const readmePath = '.github/profile/README.md';
+              // Read current README in profile path (store under top-level `profile/` folder)
+              const readmePath = 'profile/README.md';
               let currentReadme = '';
               let readmeSha = null;
               try {
@@ -205,9 +205,9 @@ jobs:
                     await github.rest.repos.createOrUpdateFileContents({ owner: repoOwner, repo: repoName, path: targetPath, message: `chore: add ${targetPath}`, content: encoded, branch: baseBranch, sha: existingSha });
                   };
 
-                  await uploadFile('leaderboard.png', '.github/profile/leaderboard.png');
-                  await uploadFile('top_repos.png', '.github/profile/top_repos.png');
-                  await uploadFile('top_authors.png', '.github/profile/top_authors.png');
+                  await uploadFile('leaderboard.png', 'profile/leaderboard.png');
+                  await uploadFile('top_repos.png', 'profile/top_repos.png');
+                  await uploadFile('top_authors.png', 'profile/top_authors.png');
 
                   console.log(`Committed leaderboard and images directly to ${baseBranch}`);
                 } catch (e) {

@@ -32,6 +32,6 @@ KMB327 sınıfında beklemekteyiz. Ya da katkı sağlayanlara mail atabilirsiniz
 ---
 
 created by student's
-## Leaderboard
+## Lider Tablosu
 
-![Leaderboard](.github\profile\top_authors.png)
+![Lider Tablosu](.github/profile/top_authors.png)
