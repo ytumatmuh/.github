@@ -180,61 +180,39 @@ jobs:
               }
 
               const leaderboardMd = await fs.readFile('leaderboard_weekly.md', 'utf8');
-              const startMarker = '<!-- leaderboard-start -->';
-              const endMarker = '<!-- leaderboard-end -->';
-              let newReadme;
-              if (currentReadme.includes(startMarker) && currentReadme.includes(endMarker)) {
-                // replace between markers
-                const re = new RegExp(`${startMarker}[\s\S]*?${endMarker}`, 'g');
-                newReadme = currentReadme.replace(re, `${startMarker}\n${leaderboardMd}\n${endMarker}`);
-              } else {
-                // append new section
-                const appendMarker = '\n\n---\n\n';
-                newReadme = currentReadme + appendMarker + startMarker + '\n' + leaderboardMd + '\n' + endMarker + '\n';
-              }
+              // Append the generated leaderboard to the end of the existing README (do not create markers or branches)
+              let newReadme = currentReadme + '\n\n' + leaderboardMd + '\n';
 
               if (currentReadme.trim() === newReadme.trim()) {
-                console.log('README already up-to-date, skipping PR creation.');
+                console.log('README already up-to-date, skipping commit.');
               } else {
-                const timestamp = Date.now();
-                const branchName = `leaderboard/update-${timestamp}`;
-
-                // create branch from base
-                await github.rest.git.createRef({ owner: repoOwner, repo: repoName, ref: `refs/heads/${branchName}`, sha: baseSha });
-
-                // commit README update
-                const newReadmeEncoded = Buffer.from(newReadme, 'utf8').toString('base64');
-                await github.rest.repos.createOrUpdateFileContents({ owner: repoOwner, repo: repoName, path: readmePath, message: `chore: update leaderboard (${new Date().toISOString().split('T')[0]})`, content: newReadmeEncoded, branch: branchName, sha: readmeSha });
-
-                // helper to upload image files into .github/profile/
-                const uploadFile = async (localPath, targetPath) => {
-                  const content = await fs.readFile(localPath);
-                  const encoded = Buffer.from(content).toString('base64');
-                  let existingSha = null;
-                  try {
-                    const existing = await github.rest.repos.getContent({ owner: repoOwner, repo: repoName, path: targetPath, ref: baseBranch });
-                    existingSha = existing.data.sha;
-                  } catch (e) {
-                    // file may not exist
-                  }
-                  await github.rest.repos.createOrUpdateFileContents({ owner: repoOwner, repo: repoName, path: targetPath, message: `chore: add ${targetPath}`, content: encoded, branch: branchName, sha: existingSha });
-                };
-
-                await uploadFile('leaderboard.png', '.github/profile/leaderboard.png');
-                await uploadFile('top_repos.png', '.github/profile/top_repos.png');
-                await uploadFile('top_authors.png', '.github/profile/top_authors.png');
-
-                // create PR as draft
-                const pr = await github.rest.pulls.create({ owner: repoOwner, repo: repoName, title: `chore: update leaderboard (${new Date().toISOString().split('T')[0]})`, head: branchName, base: baseBranch, body: 'Automated leaderboard update (draft). Please review and merge.', draft: true });
-                console.log('Created draft PR:', pr.data.html_url);
-
-                // request reviewer and assign to Onur-TURAN
+                // Commit directly to the default branch (no branch creation / PR)
                 try {
-                  await github.rest.pulls.requestReviewers({ owner: repoOwner, repo: repoName, pull_number: pr.data.number, reviewers: ['Onur-TURAN'] });
-                } catch (e) { console.log('requestReviewers error:', e.message || e); }
-                try {
-                  await github.rest.issues.addAssignees({ owner: repoOwner, repo: repoName, issue_number: pr.data.number, assignees: ['Onur-TURAN'] });
-                } catch (e) { console.log('addAssignees error:', e.message || e); }
+                  const newReadmeEncoded = Buffer.from(newReadme, 'utf8').toString('base64');
+                  await github.rest.repos.createOrUpdateFileContents({ owner: repoOwner, repo: repoName, path: readmePath, message: `chore: update leaderboard (${new Date().toISOString().split('T')[0]})`, content: newReadmeEncoded, branch: baseBranch, sha: readmeSha });
+
+                  // helper to upload image files into profile/ directly on baseBranch
+                  const uploadFile = async (localPath, targetPath) => {
+                    const content = await fs.readFile(localPath);
+                    const encoded = Buffer.from(content).toString('base64');
+                    let existingSha = null;
+                    try {
+                      const existing = await github.rest.repos.getContent({ owner: repoOwner, repo: repoName, path: targetPath, ref: baseBranch });
+                      existingSha = existing.data.sha;
+                    } catch (e) {
+                      // file may not exist
+                    }
+                    await github.rest.repos.createOrUpdateFileContents({ owner: repoOwner, repo: repoName, path: targetPath, message: `chore: add ${targetPath}`, content: encoded, branch: baseBranch, sha: existingSha });
+                  };
+
+                  await uploadFile('leaderboard.png', '.github/profile/leaderboard.png');
+                  await uploadFile('top_repos.png', '.github/profile/top_repos.png');
+                  await uploadFile('top_authors.png', '.github/profile/top_authors.png');
+
+                  console.log(`Committed leaderboard and images directly to ${baseBranch}`);
+                } catch (e) {
+                  console.log('Direct commit failed:', e.message || e);
+                }
               }
             } catch (e) {
               console.log('PR automation failed:', e.message || e);
