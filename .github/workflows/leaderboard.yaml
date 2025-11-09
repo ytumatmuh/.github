@@ -100,22 +100,59 @@ jobs:
             await fs.writeFile('leaderboard_weekly.json', JSON.stringify({ generated_at: new Date().toISOString(), since, org, topRepos, topAuthors, repoAuthors }, null, 2));
 
             // produce two charts (top repos and top authors)
+            const placeholderBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='; // 1x1 transparent PNG
             const qc = async (labels, data, title, filename) => {
-              const chartConfig = { type: 'bar', data: { labels, datasets: [{ label: title, data }] }, options: { plugins: { legend: { display: false } }, title: { display: true, text: title }, scales: { y: { beginAtZero: true } } } };
-              const qcResp = await fetch('https://quickchart.io/chart/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chart: chartConfig, width: 1200, height: 600, backgroundColor: 'white' }) });
-              const qcJson = await qcResp.json();
-              const imgResp = await fetch(qcJson.url);
-              const arr = await imgResp.arrayBuffer();
-              await fs.writeFile(filename, Buffer.from(arr));
+              try {
+                if (!labels || labels.length === 0) {
+                  // no data -> write placeholder so downstream steps still find a file
+                  await fs.writeFile(filename, Buffer.from(placeholderBase64, 'base64'));
+                  console.log(`Wrote placeholder ${filename} (no data)`);
+                  return;
+                }
+                const chartConfig = { type: 'bar', data: { labels, datasets: [{ label: title, data }] }, options: { plugins: { legend: { display: false } }, title: { display: true, text: title }, scales: { y: { beginAtZero: true } } } };
+                // request chart from QuickChart
+                let qcJson;
+                try {
+                  const qcResp = await fetch('https://quickchart.io/chart/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chart: chartConfig, width: 1200, height: 600, backgroundColor: 'white' }) });
+                  qcJson = await qcResp.json();
+                } catch (e) {
+                  console.log(`QuickChart /create request failed for ${filename}:`, e.message || e);
+                }
+                if (qcJson && qcJson.url) {
+                  try {
+                    const imgResp = await fetch(qcJson.url);
+                    if (!imgResp.ok) throw new Error(`HTTP ${imgResp.status}`);
+                    const arr = await imgResp.arrayBuffer();
+                    await fs.writeFile(filename, Buffer.from(arr));
+                    return;
+                  } catch (e) {
+                    console.log(`QuickChart image fetch failed for ${filename}:`, e.message || e);
+                  }
+                }
+                // fallback if QuickChart failed
+                await fs.writeFile(filename, Buffer.from(placeholderBase64, 'base64'));
+                console.log(`Wrote fallback placeholder ${filename}`);
+              } catch (e) {
+                console.log('qc helper error:', e.message || e);
+                try { await fs.writeFile(filename, Buffer.from(placeholderBase64, 'base64')); } catch (e2) { console.log('could not write placeholder:', e2.message || e2); }
+              }
             };
 
             await qc(topRepos.map(r=>r.repo), topRepos.map(r=>r.commits), `Top repos — ${org}`, 'top_repos.png');
             await qc(topAuthors.map(a=>a.author), topAuthors.map(a=>a.commits), `Top authors — ${org}`, 'top_authors.png');
 
-            // create a generic leaderboard.png (use top_repos as main visualization)
+            // create a generic leaderboard.png (use top_repos as main visualization). If copy fails, try top_authors, else write placeholder.
             try {
               await fs.copyFile('top_repos.png', 'leaderboard.png');
-            } catch (e) { console.log('could not create leaderboard.png:', e.message || e); }
+            } catch (e) {
+              console.log('copy top_repos.png -> leaderboard.png failed:', e.message || e);
+              try {
+                await fs.copyFile('top_authors.png', 'leaderboard.png');
+              } catch (e2) {
+                console.log('copy top_authors.png -> leaderboard.png failed:', e2.message || e2);
+                try { await fs.writeFile('leaderboard.png', Buffer.from(placeholderBase64, 'base64')); console.log('Wrote placeholder leaderboard.png'); } catch (e3) { console.log('could not write leaderboard.png fallback:', e3.message || e3); }
+              }
+            }
 
             console.log('Generated leaderboard_weekly.md, leaderboard_weekly.json, top_repos.png, top_authors.png');
 
