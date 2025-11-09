@@ -36,6 +36,33 @@ KMB327 sınıfında beklemekteyiz. Ya da katkı sağlayanlara mail atabilirsiniz
 created by student's
 
 <!-- leaderboard-start -->
-*Leaderboard will be updated automatically by the weekly workflow.*
-![Leaderboard](profile/leaderboard.png)
+# Weekly commit leaderboard for org: ytumatmuh
+_Period start:_ 2025-11-02T18:01:02.947Z
+
+## Top repositories (by commits in last 7 days)
+| Repo | Commits |
+| --- | ---: |
+| .github | 19 |
+| renkist | 4 |
+
+## Top contributors (by commits in last 7 days)
+| Author | Commits |
+| --- | ---: |
+| Onur-TURAN | 14 |
+| github-actions[bot] | 8 |
+| Onur TURAN | 1 |
+
+## Per-repo contributor breakdown (top 5 per repo)
+### .github — 19 commits
+| Author | Commits |
+| --- | ---: |
+| Onur-TURAN | 11 |
+| github-actions[bot] | 8 |
+
+### renkist — 4 commits
+| Author | Commits |
+| --- | ---: |
+| Onur-TURAN | 3 |
+| Onur TURAN | 1 |
+
 <!-- leaderboard-end -->
