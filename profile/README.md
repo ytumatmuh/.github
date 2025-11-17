@@ -37,32 +37,15 @@ created by student's
 
 <!-- leaderboard-start -->
 # Weekly commit leaderboard for org: ytumatmuh
-_Period start:_ 2025-11-03T08:14:30.341Z
+_Period start:_ 2025-11-10T08:14:44.794Z
 
 ## Top repositories (by commits in last 7 days)
 | Repo | Commits |
 | --- | ---: |
-| .github | 23 |
-| renkist | 4 |
 
 ## Top contributors (by commits in last 7 days)
 | Author | Commits |
 | --- | ---: |
-| Onur-TURAN | 14 |
-| github-actions[bot] | 12 |
-| Onur TURAN | 1 |
 
 ## Per-repo contributor breakdown (top 5 per repo)
-### .github — 23 commits
-| Author | Commits |
-| --- | ---: |
-| github-actions[bot] | 12 |
-| Onur-TURAN | 11 |
-
-### renkist — 4 commits
-| Author | Commits |
-| --- | ---: |
-| Onur-TURAN | 3 |
-| Onur TURAN | 1 |
-
 <!-- leaderboard-end -->
