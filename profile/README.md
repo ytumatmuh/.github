@@ -37,22 +37,15 @@ created by student's
 
 <!-- leaderboard-start -->
 # Weekly commit leaderboard for org: ytumatmuh
-_Period start:_ 2025-12-01T08:15:58.372Z
+_Period start:_ 2025-12-08T08:16:25.879Z
 
 ## Top repositories (by commits in last 7 days)
 | Repo | Commits |
 | --- | ---: |
-| fuzzy-waddle | 2 |
 
 ## Top contributors (by commits in last 7 days)
 | Author | Commits |
 | --- | ---: |
-| Elif Zühre Açıkgöz | 2 |
 
 ## Per-repo contributor breakdown (top 5 per repo)
-### fuzzy-waddle — 2 commits
-| Author | Commits |
-| --- | ---: |
-| Elif Zühre Açıkgöz | 2 |
-
 <!-- leaderboard-end -->
