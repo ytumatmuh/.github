@@ -37,22 +37,15 @@ created by student's
 
 <!-- leaderboard-start -->
 # Weekly commit leaderboard for org: ytumatmuh
-_Period start:_ 2026-01-05T08:16:33.136Z
+_Period start:_ 2026-01-12T08:17:45.041Z
 
 ## Top repositories (by commits in last 7 days)
 | Repo | Commits |
 | --- | ---: |
-| .github | 4 |
 
 ## Top contributors (by commits in last 7 days)
 | Author | Commits |
 | --- | ---: |
-| github-actions[bot] | 4 |
 
 ## Per-repo contributor breakdown (top 5 per repo)
-### .github — 4 commits
-| Author | Commits |
-| --- | ---: |
-| github-actions[bot] | 4 |
-
 <!-- leaderboard-end -->
