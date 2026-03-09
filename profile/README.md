@@ -37,29 +37,22 @@ created by student's
 
 <!-- leaderboard-start -->
 # Weekly commit leaderboard for org: ytumatmuh
-_Period start:_ 2026-02-23T08:29:08.002Z
+_Period start:_ 2026-03-02T08:29:47.930Z
 
 ## Top repositories (by commits in last 7 days)
 | Repo | Commits |
 | --- | ---: |
-| .github | 4 |
-| matmuhbackend | 3 |
+| matmuhbackend | 21 |
 
 ## Top contributors (by commits in last 7 days)
 | Author | Commits |
 | --- | ---: |
-| github-actions[bot] | 4 |
-| yustyy | 3 |
+| yustyy | 21 |
 
 ## Per-repo contributor breakdown (top 5 per repo)
-### .github — 4 commits
+### matmuhbackend — 21 commits
 | Author | Commits |
 | --- | ---: |
-| github-actions[bot] | 4 |
-
-### matmuhbackend — 3 commits
-| Author | Commits |
-| --- | ---: |
-| yustyy | 3 |
+| yustyy | 21 |
 
 <!-- leaderboard-end -->
