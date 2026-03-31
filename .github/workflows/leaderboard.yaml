@@ -9,7 +9,7 @@ console.log("SINCE:", since);
 // repos
 const repos = await github.paginate(
   github.rest.repos.listForOrg,
-  { org, type: 'all', per_page: 1000 }
+  { org, type: 'all', per_page: 100 }
 );
 
 console.log("Total repos:", repos.length);
