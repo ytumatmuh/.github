@@ -1,0 +1,35 @@
+{
+  "since": "2026-03-21T16:16:43.660Z",
+  "repoItems": [
+    {
+      "repo": ".github",
+      "commits": 17
+    },
+    {
+      "repo": "fuzzy-waddle",
+      "commits": 3
+    }
+  ],
+  "authorItems": [
+    {
+      "author": "github-actions[bot]",
+      "commits": 8
+    },
+    {
+      "author": "Onur-TURAN",
+      "commits": 5
+    },
+    {
+      "author": "Copilot",
+      "commits": 4
+    },
+    {
+      "author": "zeyynep34",
+      "commits": 2
+    },
+    {
+      "author": "zeyneptanyildizi@Zeynep-MacBook-Pro.local",
+      "commits": 1
+    }
+  ]
+}
