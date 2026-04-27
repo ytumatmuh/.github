@@ -1,16 +1,16 @@
 # 30-day commit leaderboard (ytumatmuh)
-_Since: 2026-03-21T16:16:43.660Z_
+_Since: 2026-03-28T02:40:07.354Z_
 
 ## Top repos
 | Repo | Commits |
 | --- | ---: |
-| .github | 17 |
+| .github | 14 |
 | fuzzy-waddle | 3 |
 
 ## Top authors
 | Author | Commits |
 | --- | ---: |
-| github-actions[bot] | 8 |
+| github-actions[bot] | 5 |
 | Onur-TURAN | 5 |
 | Copilot | 4 |
 | zeyynep34 | 2 |
