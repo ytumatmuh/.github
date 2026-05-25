@@ -1,9 +1,9 @@
 {
-  "since": "2026-04-18T03:34:10.424Z",
+  "since": "2026-04-25T03:40:28.512Z",
   "repoItems": [
     {
       "repo": ".github",
-      "commits": 5
+      "commits": 4
     },
     {
       "repo": "fuzzy-waddle",
@@ -14,10 +14,6 @@
     {
       "author": "github-actions[bot]",
       "commits": 4
-    },
-    {
-      "author": "Onur-TURAN",
-      "commits": 1
     },
     {
       "author": "aysenurkara2",
