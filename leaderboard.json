@@ -1,5 +1,5 @@
 {
-  "since": "2026-05-02T03:55:53.775Z",
+  "since": "2026-05-09T03:53:52.543Z",
   "repoItems": [
     {
       "repo": ".github",
@@ -7,7 +7,7 @@
     },
     {
       "repo": "fuzzy-waddle",
-      "commits": 2
+      "commits": 1
     }
   ],
   "authorItems": [
@@ -17,10 +17,6 @@
     },
     {
       "author": "zeyynep34",
-      "commits": 1
-    },
-    {
-      "author": "aysenurkara2",
       "commits": 1
     }
   ]
