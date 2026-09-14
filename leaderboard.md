@@ -1,14 +1,14 @@
 # 30-day commit leaderboard (ytumatmuh)
-_Since: 2026-08-08T02:57:25.237Z_
+_Since: 2026-08-15T03:26:31.244Z_
 
 ## Top repos
 | Repo | Commits |
 | --- | ---: |
-| matmuhbackend | 53 |
+| matmuhbackend | 46 |
 | .github | 4 |
 
 ## Top authors
 | Author | Commits |
 | --- | ---: |
-| yustyy | 53 |
+| yustyy | 46 |
 | github-actions[bot] | 4 |
