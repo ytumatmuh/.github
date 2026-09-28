@@ -32,6 +32,9 @@ KMB327 sınıfında beklemekteyiz. Ya da katkı sağlayanlara mail atabilirsiniz
 -  Kriptoloji:
 - [babalizeze@gmail.com]
 - [erenuzunda472@gmail.com]
+
+-  Web Geliştirme:
+- [yusuf.acmaci@hotmail.com]
   
 
 
