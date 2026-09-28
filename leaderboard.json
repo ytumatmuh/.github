@@ -1,23 +1,47 @@
 {
-  "since": "2026-08-22T03:23:24.211Z",
+  "since": "2026-08-29T03:43:39.745Z",
   "repoItems": [
     {
-      "repo": "matmuhbackend",
-      "commits": 49
+      "repo": "matmuh-frontend",
+      "commits": 114
+    },
+    {
+      "repo": "matmuh-backend",
+      "commits": 30
     },
     {
       "repo": ".github",
       "commits": 4
+    },
+    {
+      "repo": "fuzzy-waddle",
+      "commits": 1
     }
   ],
   "authorItems": [
     {
+      "author": "kanekalp",
+      "commits": 90
+    },
+    {
       "author": "yustyy",
-      "commits": 49
+      "commits": 26
+    },
+    {
+      "author": "egehanavcu",
+      "commits": 23
+    },
+    {
+      "author": "fatiihnaz",
+      "commits": 5
     },
     {
       "author": "github-actions[bot]",
       "commits": 4
+    },
+    {
+      "author": "ardagokce34-debug",
+      "commits": 1
     }
   ]
 }
