@@ -25,8 +25,14 @@ Bu proje, [ytumatmuh öğrencileri] topluluğu için hazırlanan bir tanıtım s
 KMB327 sınıfında beklemekteyiz. Ya da katkı sağlayanlara mail atabilirsiniz.
 
 ## İletişim
+- **E-posta:**
+-  Siber güvenlik:
+- [onurturan.t@gmail.com]
 
-- **E-posta:** [onurturan.t@gmail.com]
+-  Kriptoloji:
+- [babalizeze@gmail.com]
+- [erenuzunda472@gmail.com]
+  
 
 
 ---
