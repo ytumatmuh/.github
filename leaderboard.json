@@ -1,13 +1,13 @@
 {
-  "since": "2026-09-12T04:24:01.733Z",
+  "since": "2026-09-19T03:18:51.500Z",
   "repoItems": [
     {
       "repo": "matmuh-frontend",
-      "commits": 106
+      "commits": 84
     },
     {
       "repo": "matmuh-backend",
-      "commits": 29
+      "commits": 24
     },
     {
       "repo": ".github",
@@ -21,15 +21,15 @@
   "authorItems": [
     {
       "author": "kanekalp",
-      "commits": 82
+      "commits": 69
     },
     {
       "author": "yustyy",
-      "commits": 25
+      "commits": 20
     },
     {
       "author": "egehanavcu",
-      "commits": 23
+      "commits": 14
     },
     {
       "author": "fatiihnaz",
