@@ -1,23 +1,19 @@
 # 30-day commit leaderboard (ytumatmuh)
-_Since: 2026-09-19T03:18:51.500Z_
+_Since: 2026-09-26T03:16:51.362Z_
 
 ## Top repos
 | Repo | Commits |
 | --- | ---: |
-| matmuh-frontend | 84 |
-| matmuh-backend | 24 |
-| .github | 8 |
-| fuzzy-waddle | 4 |
+| matmuh-backend | 7 |
+| .github | 6 |
+| matmuh-frontend | 2 |
+| fuzzy-waddle | 1 |
 
 ## Top authors
 | Author | Commits |
 | --- | ---: |
-| kanekalp | 69 |
-| yustyy | 20 |
-| egehanavcu | 14 |
-| fatiihnaz | 6 |
+| yustyy | 9 |
 | github-actions[bot] | 4 |
-| talha24052050 | 3 |
-| Eren-Uzundag | 2 |
+| fatiihnaz | 1 |
 | Onur-TURAN | 1 |
-| ardagokce34-debug | 1 |
+| talha24052050 | 1 |
