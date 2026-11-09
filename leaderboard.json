@@ -1,9 +1,9 @@
 {
-  "since": "2026-10-03T04:30:11.643Z",
+  "since": "2026-10-10T04:43:14.538Z",
   "repoItems": [
     {
       "repo": "matmuh-backend",
-      "commits": 7
+      "commits": 6
     },
     {
       "repo": ".github",
@@ -22,10 +22,6 @@
     {
       "author": "github-actions[bot]",
       "commits": 4
-    },
-    {
-      "author": "fatiihnaz",
-      "commits": 1
     }
   ]
 }
