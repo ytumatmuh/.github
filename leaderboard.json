@@ -1,24 +1,12 @@
 {
-  "since": "2026-10-17T04:48:04.936Z",
+  "since": "2026-10-24T05:49:56.087Z",
   "repoItems": [
-    {
-      "repo": "matmuh-backend",
-      "commits": 6
-    },
     {
       "repo": ".github",
       "commits": 4
-    },
-    {
-      "repo": "matmuh-frontend",
-      "commits": 2
     }
   ],
   "authorItems": [
-    {
-      "author": "yustyy",
-      "commits": 8
-    },
     {
       "author": "github-actions[bot]",
       "commits": 4
